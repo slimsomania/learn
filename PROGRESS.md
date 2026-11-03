@@ -34,6 +34,10 @@ Tracks the phases in [ROADMAP.md](ROADMAP.md). Tick items as you finish them, an
   - [ ] "Copilot" is assignable on issues (coding agent)
   - [ ] Codex shows up as an Agent HQ partner agent
   - [ ] Any non-OpenAI model in the picker (Gemini, Grok, Kimi, MAI)? This decides between cross-vendor and cross-tier review
+- VPS (Hermes, ROADMAP §5.1):
+  - [ ] Note the exact Hetzner plan (vCPU / RAM)
+  - [ ] Check the security checklist in §5.1 against the current Hermes config (allowed users, approvals mode, backend)
+  - [ ] Which Claude plan do you have: Pro, or Max/Ultra?
 - Home: OpenAI access for codex-plugin-cc
   - [ ] Check platform.openai.com for an existing API key and credit balance (API billing is separate from ChatGPT plans)
   - [ ] Decide between API key (pay per use) and ChatGPT Plus (flat fee, more Codex features) after ~2 weeks of real reviews

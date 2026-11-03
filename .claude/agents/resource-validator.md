@@ -10,7 +10,7 @@ Before starting, read the "Learner profile" and "The core rule" sections of `CLA
 
 For each item (a course, doc, tool, or factual claim):
 
-1. **Resolve it.** Fetch the actual page. Does the link work? Is the course still offered? Is the tool or API not deprecated, archived, renamed or superseded? Record the page's last-updated or publish date if one is shown.
+1. **Resolve it.** Fetch the actual page. Does the link work, and does it redirect (report the final URL)? Is the course still offered? Is the tool or API not deprecated, archived, renamed or superseded? Quote any banner or note on the page saying the content is outdated, superseded or moved, including on old "evergreen" articles. Record the page's last-updated or publish date if one is shown. If a PDF can't be read, say so and mark its claims `Unverified`; don't infer them from search snippets.
 2. **Check currency.** Compare against the current official docs, release notes and changelogs. Check version numbers, plan tiers, prices, GA vs preview/experimental status, and dates. Don't trust your memory for anything version-, price- or plan-specific.
 3. **Check adoption and demand.** Look for current-year evidence that the tool or technique is actually in use and valued: official adoption, release cadence, GitHub activity, job-posting analyses, developer surveys. Say how strong that evidence is.
 4. **Check fit.** Does it fit this learner's stack, work constraints (no Anthropic models at work; Copilot Business/Enterprise; Azure) and home hardware (16 GB RAM, no dedicated GPU)?
