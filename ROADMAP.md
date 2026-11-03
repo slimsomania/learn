@@ -2,7 +2,8 @@
 
 Prepared: November 2, 2026
 For: a senior developer (React, .NET, Python) who uses AI tools daily and wants to (1) run a team of coding agents, (2) build agents and orchestration, (3) run and adapt models locally.
-Merges: `Claude - Agentic AI Learning Path 2026.md` and `Copilot - AI-agent-workflow-learning-roadmap.md`, with corrections from a fresh source check.
+Merges: [`archive/2026-11/Claude - Agentic AI Learning Path 2026.md`](archive/2026-11/) and [`archive/2026-11/Copilot - AI-agent-workflow-learning-roadmap.md`](archive/2026-11/), with corrections from a fresh source check.
+Status: canonical, living document. Progress is tracked in [PROGRESS.md](PROGRESS.md); every validation pass is logged in [validation-log.md](validation-log.md).
 
 ---
 
@@ -82,7 +83,7 @@ There are only three mechanisms:
 
 1. **Parent ↔ child (subagents).** The parent sends a task prompt; the child works in fresh context and returns one final message. Children don't talk to each other.
    - [Claude Code subagents](https://code.claude.com/docs/en/sub-agents) · [Codex subagents](https://developers.openai.com/codex/multi-agent) · [Copilot custom agents](https://docs.github.com/en/copilot/concepts/customizations/custom-agents)
-2. **Shared task list + messages (agent teams).** A lead creates tasks; teammates claim them, message each other, and hooks (`TaskCompleted`, `TeammateIdle`) can reject work. Experimental, off by default.
+2. **Shared task list + messages (agent teams).** A lead creates tasks; teammates claim them, message each other, and hooks (`TaskCreated`, `TaskCompleted`, `TeammateIdle`; exit code 2 blocks) can reject work. Still experimental as of Nov 2026: enable it with `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`. Teams need an interactive session (none under `-p`). Build on subagents plus hooks first (`model:`, `isolation: worktree`), and add teams second.
    - [Claude Code agent teams](https://code.claude.com/docs/en/agent-teams)
 3. **Artifacts in the repo.** Spec files, plan files, progress notes, commits, PRs, CI results. This works across any tools and models, and it's the most reliable mechanism.
    - [Effective harnesses for long-running agents, Anthropic](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents): progress file + git history as memory between sessions.
@@ -124,6 +125,44 @@ A handoff is valid only if it names an **exact commit** and says what was and wa
 
 Windows note: everything works natively except the agent-teams split-pane view, which needs tmux (use WSL2 or the default in-process mode).
 
+**Shared instruction format for both machines:** use `AGENTS.md` (Copilot, Codex, Hermes and others read it; Claude Code via `CLAUDE.md`) plus skills in `.agents/skills` or `.github/skills`. Copilot's coding agent also reads `CLAUDE.md` and `GEMINI.md`, so keep Anthropic-specific instructions out of work repos.
+
+### 3.6 Work-side team: Copilot only, no Anthropic models (validated Nov 2, 2026)
+
+Everything in 3.1–3.4 maps onto Copilot Business/Enterprise:
+
+| Concept | Copilot equivalent |
+|---|---|
+| Role file | [Custom agent](https://docs.github.com/en/copilot/reference/custom-agents-configuration) `.github/agents/<role>.agent.md`: `name`, `description`, `tools`, **`model`**, `mcp-servers`, `handoffs` (`handoffs` is ignored on github.com). Works in VS Code, Copilot CLI and the github.com coding agent; repo-, org- or enterprise-level |
+| Parallel subagents | Copilot CLI `/fleet` (since Apr 2026): parallel subagents with their own contexts that can use your `.github/agents` roles. No messaging between them |
+| Cloud implementer | Copilot coding agent (issue → PR), and **Codex via Agent HQ** as a second cloud agent (Business since Feb 26, 2026; one premium request per session). Keep the **Claude** partner agent off |
+| Cross-model review | Pin a different vendor per role. Example: implementer = GPT-6.x or GPT-5.3-Codex, reviewer = Gemini 4 Argon, optional tie-break reviewer = Grok or Kimi. Check the [live model list](https://docs.github.com/en/copilot/reference/ai-models/supported-models); names change often |
+| PR review | Copilot code review, driven by `copilot-instructions.md`, is one reviewer. Your own `reviewer.agent.md` on another model is a separate step; there's no official way to merge the two |
+| Gates | GitHub Actions, branch protection, required checks |
+
+**Copilot has several surfaces, each with its own admin policy.** Having Copilot doesn't mean you have all of them:
+
+| Surface | What it is | How to check you have it |
+|---|---|---|
+| IDE chat / agent mode | Copilot inside VS Code or Visual Studio. Custom agents (`.github/agents`) work here | You're using it today |
+| **Copilot CLI** | A separate terminal tool (`copilot`), GA since Feb 2026. This is where `/fleet` and headless scripting live | Install it per the [Copilot CLI docs](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/use-copilot-cli) and sign in. If the org policy is off, it says so |
+| Coding agent (cloud) | Assign an issue to Copilot on github.com → it opens a PR | "Copilot" appears in an issue's Assignees list |
+| Agent HQ partner agents | Codex (and Claude, keep off) as cloud agents | They appear next to Copilot in the agent picker on github.com |
+| Copilot code review | Copilot as a PR reviewer | You're using it today |
+
+**Your org's models (as you reported, Nov 2026):** GPT-6.1 (Sol, Terra), GPT-6 Sol/Luna and other recent OpenAI models; not GPT-6 Astra. **Still to check: are any non-OpenAI models enabled (Gemini 4 Argon, Grok, Kimi, MAI)?**
+- **If yes:** pin a different vendor for the reviewer, as in the table above.
+- **If OpenAI only:** true cross-vendor review isn't possible at work. Get the closest equivalent:
+  - Use a different model *tier* for the reviewer than the implementer (e.g. implementer GPT-6.1 Sol, reviewer GPT-6.1 Terra or GPT-6 Sol).
+  - Give the reviewer a fresh context and a read-only tool set.
+  - Add Copilot code review as an independent second pass.
+  - Rely on tests and CI as the real gate.
+  - Measure whether this catches defects (§10) rather than assuming it does.
+
+**Ask your admin about** (only the ones you don't already have): the Copilot CLI policy, the cloud (coding) agent, the Codex partner-agent policy, and any non-OpenAI models. Anthropic models and the Claude agent stay disabled; per-model toggles handle this.
+
+Exercise (work): create `implementer`, `tester` and `reviewer` agent files with three different pinned models, run one real ticket through `/fleet` → PR → Copilot code review + your reviewer agent, and record the §10 metrics.
+
 Exercise (Phase B): implement a React list + .NET endpoint feature. Planner writes `spec.md` with the API contract → two implementers in two worktrees → tester writes tests from the spec → Codex reviews the exact merge commit → you accept/reject each finding → CI merges. Record the metrics from section 10.
 
 ---
@@ -134,7 +173,9 @@ Exercise (Phase B): implement a React list + .NET endpoint feature. Planner writ
 |---|---|---|
 | Cross-model review | Implementer and reviewer use different vendors' models; they make fewer shared mistakes | [openai/codex-plugin-cc](https://github.com/openai/codex-plugin-cc): official OpenAI plugin for Claude Code: `/codex:review`, `/codex:adversarial-review`, optional review gate on stop. Works with a ChatGPT plan or API key |
 | Per-role model choice | Strong model for planning/review, cheaper/faster model for tests, search, boilerplate | `model:` field in the [subagent](https://code.claude.com/docs/en/sub-agents) file; model selection per Copilot custom agent |
-| Multi-vendor agents on GitHub | Claude and Codex as assignable agents on issues/PRs next to Copilot | GitHub Agent HQ (Copilot Pro+/Enterprise) |
+| Multi-vendor agents on GitHub | Claude and Codex as assignable agents on issues/PRs next to Copilot | GitHub Agent HQ (Pro, Pro+, Business, Enterprise; admin enables each partner agent). **At work: Codex only** (see 3.6) |
+| Gemini as a home reviewer | Your Google AI Pro plan works with **Antigravity CLI (`agy`)** (announced on the Google Developers Blog, "transitioning Gemini CLI to Antigravity CLI"), not Gemini CLI. Google moved Gemini CLI to `agy` at I/O (May 19, 2026), and Gemini CLI stopped serving AI Pro/Ultra on Jun 18, 2026 | Use `agy` interactively, or hand it the exact diff manually, as an optional third reviewer. Wrapping or scripting `agy` on a consumer plan has unclear terms, so for scripted use take a paid Gemini API key (Gemini CLI still works with one). Claude Code ↔ Gemini MCP bridges are community projects only, not official |
+| Home cross-model reviewer (main) | `openai/codex-plugin-cc`, official, ~35k stars | Needs Node 18.18+ and `npm i -g @openai/codex`, then `/codex:setup`. ChatGPT Free/Go gives light access, enough for a trial; Plus or an API key is needed for regular use |
 | Provider-neutral API layer | One interface, swap providers by config | .NET: [Microsoft.Extensions.AI](https://learn.microsoft.com/en-us/dotnet/ai/microsoft-extensions-ai) (`IChatClient`). Python: [LiteLLM](https://docs.litellm.ai). Hosted router: [OpenRouter](https://openrouter.ai/docs) |
 | Model comparison by evidence | Same task, same acceptance criteria, different setups | [AI Coding Workflows: From Cloud to Local (DeepLearning.AI + JetBrains)](https://www.deeplearning.ai/courses/ai-coding-workflows-from-cloud-to-local): free, 1.5 h; swaps Claude Code ↔ OpenCode, routes via OpenRouter, ends with a local model in LM Studio |
 
@@ -161,7 +202,9 @@ Your coordinator must handle: task IDs and state, exit codes, timeouts, cancella
 | [Claude Agent SDK (Python/TS)](https://code.claude.com/docs/en/agent-sdk/overview) | Claude Code's harness as a library: subagents, hooks, MCP, permissions in code |
 | [OpenAI agent runtime options](https://developers.openai.com/api/docs/guides/agents) | Agents SDK vs Responses API vs managed agents: who runs the loop and stores state |
 
-Note: SDK/API use is billed separately from interactive subscriptions. Check auth and terms before automating.
+Note: SDK/API use is billed separately from interactive subscriptions. Check auth and terms before automating. `--bare` is recommended for scripts and needs an API key.
+
+**Hermes Agent's place (home):** use it as the Telegram front door: kicking off jobs, notifications, triage. It doesn't drive Claude Code or Codex natively, so have it trigger `claude -p --output-format json` or `codex exec` through a script or MCP tool, and report the result back. Don't make it the code orchestrator. It supports MCP, agentskills.io skills, and per-subagent provider and model.
 
 ---
 
@@ -237,7 +280,8 @@ Phase E capstone: a .NET MCP server over one internal API → an Agent Framework
 | Topic | Why it matters |
 |---|---|
 | Quantization (GGUF Q4/Q5/Q8) | Decides whether a model fits your RAM/VRAM; [GGUF on Hugging Face](https://huggingface.co/docs/hub/gguf) |
-| VRAM math | Rough guide: Q4 ≈ 0.6 GB per billion params + context (KV cache). A 32 GB laptop handles about 12–30B models |
+| VRAM math | Q4 ≈ 0.6 GB per billion params + KV cache (~0.5–2 GB at 16–32K for small models); keep the model under ~60% of RAM. **Your 16 GB laptop (shared with the iGPU, ~9–10 GB usable):** up to 8–9B dense at 16–32K context, 14B only with short context. 32 GB: up to ~14B comfortably, ~30B dense or MoE is tight. For MoE models, the total parameter count sets memory size and the active parameters set speed |
+| Speed on your laptop | Memory bandwidth (~51 GB/s DDR4) is the limit: ~8–12 tok/s for a 4B Q4, ~4–7 tok/s for an 8–9B Q4 (estimates from similar chips; measure with `ollama run <model> --verbose`) |
 | Context length | Local servers often default low; coding agents need ≥32–64K |
 | Tool-calling support | Not every open model calls tools reliably; agents need it |
 | Licensing | Open-weight ≠ unrestricted commercial use; read the model license |
@@ -246,20 +290,25 @@ Phase E capstone: a .NET MCP server over one internal API → an Agent Framework
 
 | Tool | Use |
 |---|---|
-| [Ollama](https://docs.ollama.com/) | Easiest server; OpenAI- **and** Anthropic-compatible API |
-| [LM Studio](https://lmstudio.ai/docs) | GUI + local server; used in the DeepLearning.AI cloud-to-local course |
+| [Ollama](https://docs.ollama.com/) | **Your default.** Easiest server; OpenAI- **and** Anthropic-compatible API. On Windows, Vulkan is on by default and uses the Iris Xe GPU, but on weak iGPUs it's sometimes slower than CPU. Benchmark both and set `OLLAMA_IGPU_ENABLE=0` if CPU wins |
+| [LM Studio](https://lmstudio.ai/docs) | GUI + local server (ships the llama.cpp Vulkan runtime); used in the DeepLearning.AI cloud-to-local course |
 | [llama.cpp](https://github.com/ggml-org/llama.cpp) | The engine under most local tools; max control |
-| [vLLM](https://docs.vllm.ai) | High-throughput serving on a GPU server (team/production use) |
+| [OpenVINO 2026.x](https://docs.openvino.ai) | Intel's own runtime (CPU/iGPU/NPU), OpenAI-compatible via Model Server. Optional experiment on your Intel laptop. (IPEX-LLM was archived Jan 2026, so skip it) |
+| [vLLM](https://docs.vllm.ai) | High-throughput serving on a GPU server (team/production use); not for your laptop |
+
+**Models for your laptop (Nov 2026):** `qwen3.5:4b` (main choice for tool calling and JSON), `qwen3.5:9b` (best quality that fits), `gemma4:e4b` (second opinion, multimodal). Set `num_ctx` to 16384–32768 explicitly. gpt-oss-20b (~14 GB) does not fit sensibly.
+
+**Hardware:** don't buy now. Prices are inflated in 2026 (RTX 5090 street ~$3.7–5K, DGX Spark from ~$4.7K), and $50–100 of cloud GPU covers a year of learning. A cheap optional step is upgrading the T14 Gen 2's RAM to 32–40 GB, which allows slow 14B-class or MoE models. Confirm the slot layout on Lenovo PSREF first.
 
 ### 7.3 Local models inside your coding-agent team
 
-- **Claude Code + local model:** [Ollama Anthropic compatibility](https://docs.ollama.com/api/anthropic-compatibility) (Ollama ≥ 0.14). Set `ANTHROPIC_BASE_URL=http://localhost:11434`, `ANTHROPIC_AUTH_TOKEN=ollama`, then `claude --model qwen3-coder` (or another pulled model). Raise context to ≥32K.
+- **Claude Code + local model:** [Ollama Anthropic compatibility](https://docs.ollama.com/api/anthropic-compatibility) (Ollama ≥ 0.14; ≥ 0.14.3 for streaming tool calls). Set `ANTHROPIC_BASE_URL=http://localhost:11434`, `ANTHROPIC_AUTH_TOKEN=ollama`, then `claude --model <tag>`, or use `ollama launch claude`. Values in Claude settings files can override these env vars. Hosted web search isn't available this way. **On your laptop, do this once to learn the setup, not as a live subagent.** Each turn first processes a 20–50K-token prompt, which takes minutes here, and 9B models edit poorly; ~20–27B is the practical minimum for agentic coding.
 - **Codex / OpenAI-compatible tools:** point them at Ollama/LM Studio's OpenAI-compatible endpoint.
 - **.NET apps:** `IChatClient` from Microsoft.Extensions.AI with the Ollama provider, so a config switch swaps local and cloud.
-- **Realistic use:** local models do well on cheap roles (test scaffolding, search, summaries, private-code tasks). Keep a frontier model for planning and review. Measure this; don't assume it.
+- **Realistic use:** on your laptop, local models fit offline batch jobs: summarizing logs and docs, commit-message and docstring drafts, test stubs generated by a background script, embeddings/RAG experiments, and learning the API and tool calling. Keep frontier models for every interactive role. Measure this; don't assume it.
 - Local inference ≠ private by default: plugins, telemetry and MCP servers can still send data out.
 
-Phase C exercise: run the same Phase-B task with (a) Claude only, (b) Claude implementer + Codex reviewer, (c) local model as tester. Compare accepted-change time, defects, cost.
+Phase C exercise (home): run the same Phase-B task with (a) Claude only, (b) Claude implementer + a second-vendor reviewer (Codex via codex-plugin-cc, or Gemini via `agy`), (c) a local `qwen3.5:4b` generating test stubs as a background script. Compare accepted-change time, defects, cost. For a local model as a real interactive role, rent a GPU for a few hours and serve a ~27B model instead.
 
 ---
 
@@ -273,12 +322,14 @@ Order matters. Each step has a concrete output.
 | 2. Transformers ecosystem | [Hugging Face LLM Course](https://huggingface.co/learn/llm-course/chapter1/1) | Free · 30–40 h | Tokenizers, datasets, fine-tuning with `transformers` |
 | 3. Practical fine-tuning | [Unsloth docs](https://docs.unsloth.ai) (LoRA/QLoRA, fits a single consumer GPU or free Colab) + [Hugging Face TRL](https://huggingface.co/docs/trl) (SFT, DPO, GRPO) | Free · 10–15 h | A LoRA adapter on your own dataset, exported to GGUF and served by Ollama |
 | 4. Post-training theory | [Post-training of LLMs (DeepLearning.AI)](https://www.deeplearning.ai/short-courses/post-training-of-llms/) | Free audit · ~2 h | When to use SFT vs DPO vs RL |
-| 5. Full training run (optional) | [karpathy/nanochat](https://github.com/karpathy/nanochat) | ~$100 of rented GPU | Tokenizer → pretrain → SFT → chat UI, end to end |
+| 5. Full training run (optional) | [karpathy/nanochat](https://github.com/karpathy/nanochat) | ~$73–100 of rented GPU (~4 h on 8×H100) | Tokenizer → pretrain → SFT → chat UI, end to end |
 | 6. Research depth (optional) | [Stanford CS336: Language Modeling from Scratch](https://cs336.stanford.edu/) | Free materials · 100+ h | Needs linear algebra, probability, PyTorch, GPU budget |
 
 Before fine-tuning, always have (a) a prompt + RAG baseline and (b) a held-out eval set. Fine-tune only when it measurably beats the baseline. Fine-tuning appears in about 15% of AI-engineer postings, while agents/RAG/evals appear far more often (section 11). Treat this track as a long-term investment, not a job requirement.
 
-Phase F exercise: fine-tune a 3–8B model with Unsloth on ~1,000 examples from your domain (e.g. your codebase's commit-message or API-doc style), serve it with Ollama, compare it with the base model on your eval set.
+**Where to run it (your laptop can't fine-tune):** Unsloth's free notebooks on Colab (T4, ~15 GB) or Kaggle (~30 GPU-h/week). A QLoRA run on a 4–8B model with ~1k examples takes 15–60 min, which is $0 there. If the T4 runs out of memory, rent an RTX 4090 (~$0.35–0.90/h) or L40S (~$0.80/h) on RunPod, under $5 per experiment. Export to GGUF and serve with `ollama create` to connect this track to §7.
+
+Phase F exercise: fine-tune a 3–8B model (e.g. Qwen3.5-4B) with Unsloth on ~1,000 examples from your domain (e.g. your codebase's commit-message or API-doc style), serve it with Ollama, compare it with the base model on your eval set.
 
 ---
 
@@ -366,6 +417,8 @@ Monthly: read release notes of your harnesses, re-run 3 benchmark tasks before s
 
 Numbers differ between sources (different boards and taxonomies), so treat them as direction, not precision. The consistent ranking is: **agents + LLM integration > RAG > cloud (Azure) > observability/evals > MCP > frameworks > fine-tuning > certificates.**
 
+Multi-agent coding orchestration specifically is a **growing differentiator, not a baseline hiring requirement**. AI-agent use at work is mainstream (JetBrains 2026: 90% weekly), but a Q1 2026 survey found most developers don't run multi-agent orchestration yet. Build it on top of solid single-agent skills: context files, evals, review gates. (These figures come from secondary write-ups.)
+
 ### Certificates (optional; only if your employer values them)
 
 | Cert | Status (Nov 2026) |
@@ -403,7 +456,7 @@ Pick at most one, after Phase E.
 - [ ] Reviewer is read-only via permissions, not via prompt
 - [ ] Parallel work uses worktrees with separate ports/DBs
 - [ ] Every handoff names an exact commit and lists checks not run
-- [ ] Cross-model review set up (codex-plugin-cc or Agent HQ)
+- [ ] Cross-model review set up: home = codex-plugin-cc (optionally Gemini via `agy`); work = role agents pinned to different non-Anthropic models + Agent HQ Codex
 - [ ] Hooks/CI block merges on failing checks
 - [ ] Metrics recorded for ≥5 tasks: single agent vs team
 - [ ] One local model used in a real role
