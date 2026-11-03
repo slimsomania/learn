@@ -33,6 +33,19 @@ Edits:
 - §12: Maven price.
 Open (watch): Copilot per-plan model availability and whether the model toggle covers code review/CLI; whether Copilot code review can use Anthropic models (ask admin); Claude cert eligibility; DGX Spark Oct 2026 price; GenAI visualizer in the standalone Aspire image; HF MCP certificate issuance; Hermes reading AGENTS.md; newly posted small tool-calling models.
 
+## 2026-11-02: Revalidation of Hermes Agent and the VPS trigger/auth claims (§5.1, §3.5)
+Validators: 2 independent passes, 21 claims · Kept: 15 (9 with wording fixes) · Corrected: 3 (claude-code-action doesn't open a PR by default; `docker_forward_env` is `terminal.docker_forward_env`; approvals modes are smart/manual/off) · Resolved from watch: 1 (Hermes reads AGENTS.md, now officially documented) · Unverified: 3 (minimum VPS size, since Hermes publishes none; whether a personal bot running `claude -p` is allowed, not named in Anthropic's terms; CPU-VPS tok/s figures, secondary/undated only)
+Edits:
+- §5.1 intro: `advanced-delegation` plugin naming, context-file priority, cron delivery, release cadence.
+- New VPS-size note: CX23 4 GB is the cheapest, unavailable on Nov 2; avoid 1 GB.
+- Route A: scheduled tasks (formerly routines) beta header, limits (30/h per task + 100/h per account), untrusted fire payload, web-only tokens; claude-code-action pushes a branch + PR link, write access, PAT vs `GITHUB_TOKEN`, when `allowed_bots` applies; codex-action v1.13 with OpenAI or Azure OpenAI key.
+- Route B: backend and image keys; exfiltration warning.
+- Auth: setup-token scope and plans; terms wording quoted (explicit ban on routing plan credentials; personal-bot case moved to watch); `ANTHROPIC_AUTH_TOKEN` precedence; `--bare` default flip; Codex auth link moved to learn.chatgpt.com.
+- Security checklist: **2026 Hermes CVEs (webhook auth bypass, MCP catalog supply chain, RCE); stay on latest, ≥v0.22.2**; deny-by-default allowlist; YOLO/`off` forbidden.
+- Exercise: wording matches the action's real behavior.
+- §3.5: Hermes back in the list of AGENTS.md readers.
+Open: exact Hetzner plan (measure RAM headroom); which Claude plan (Pro vs Max+); watch Anthropic's terms on personal bots and the `-p` `--bare` default change.
+
 ## 2026-11-02: Hermes on a Hetzner VPS and laptop-off triggers
 Validators: 1 · Kept: 11 · Dropped: 1 (Remote Control for this scenario, needs the machine on) · Downgraded: 1 (Ollama on VPS) · Unverified: codex-action version, OWASP ASI titles (PDF not read; secondary summaries), whether "own bot invokes `claude -p`" is explicitly allowed (interpretation)
 Edits: new §5.1 (routes A/B, VPS auth, security checklist, VPS exercise) · §7.3 VPS inference line

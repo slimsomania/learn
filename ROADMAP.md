@@ -127,7 +127,7 @@ A handoff is valid only if it names an **exact commit** and says what was and wa
 
 Windows note: everything works natively except the agent-teams split-pane view, which needs tmux and doesn't work in Windows Terminal or the VS Code terminal (use the default in-process mode).
 
-**Shared instruction format for both machines:** use `AGENTS.md`. Copilot and Codex read it. Claude Code reads it natively since v2.1.277, but only when there's no `CLAUDE.md`; set Project instructions to `claude-md-and-agents-md` to load both. Skill folders differ: Copilot reads `.github/skills`, `.claude/skills` or `.agents/skills`; Codex reads `.agents/skills`; Claude Code reads only `.claude/skills`. Copilot's cloud agent also reads a single root-level `CLAUDE.md` or `GEMINI.md`, so keep Anthropic-specific instructions out of work repos.
+**Shared instruction format for both machines:** use `AGENTS.md`. Copilot, Codex and Hermes read it. Claude Code reads it natively since v2.1.277, but only when there's no `CLAUDE.md`; set Project instructions to `claude-md-and-agents-md` to load both. Skill folders differ: Copilot reads `.github/skills`, `.claude/skills` or `.agents/skills`; Codex reads `.agents/skills`; Claude Code reads only `.claude/skills`. Copilot's cloud agent also reads a single root-level `CLAUDE.md` or `GEMINI.md`, so keep Anthropic-specific instructions out of work repos.
 
 ### 3.6 Work-side team: Copilot only, no Anthropic models (validated Nov 2, 2026)
 
@@ -211,35 +211,38 @@ Note on billing (watch: this changed twice in 2026): signed in with a Claude pla
 
 ### 5.1 Hermes Agent on your VPS: always on, not on the home PC (validated Nov 2, 2026)
 
-Use Hermes as the Telegram front door: kicking off jobs, notifications, triage, cron reports. Don't make it the code orchestrator. It ships bundled `claude-code` and `codex` skills (`claude -p` or tmux) and an opt-in beta Codex App-Server Runtime, so it *can* dispatch to Claude Code or Codex. You can use those, or trigger `claude -p --output-format json` / `codex exec` through your own script and report the result back. It supports MCP, agentskills.io skills and cron delivered to Telegram. Subagents share one delegation model/provider by default; per-task routing needs a delegation strategy plugin (v0.22.5+). Current: v0.22.6 (Nov 2026).
+Use Hermes as the Telegram front door: kicking off jobs, notifications, triage, cron reports. Don't make it the code orchestrator. It ships bundled `claude-code` and `codex` skills (`claude -p` or tmux) and an opt-in beta Codex App-Server Runtime, so it *can* dispatch to Claude Code or Codex. You can use those, or trigger `claude -p --output-format json` / `codex exec` through your own script and report the result back. It supports MCP, agentskills.io skills and cron delivered to Telegram (`deliver: telegram`; the gateway must be running). Subagents share one delegation model/provider by default; per-task routing needs the `advanced-delegation` plugin (`delegation.backend: model_map` or `profile_routes`, v0.22.5+). It reads project context files, first match wins: `.hermes.md` > `AGENTS.override.md` > `AGENTS.md` > `CLAUDE.md`. Only one type loads, so a repo with both `AGENTS.md` and `CLAUDE.md` gives Hermes only `AGENTS.md`. Current: v0.22.6 (Nov 2, 2026; releases every few days).
+
+**VPS size:** Hermes publishes no hardware minimums. Hetzner's cheapest listed plan is CX23 (2 vCPU, 4 GB, €5.99/mo excl. VAT), but it showed as unavailable on Nov 2, 2026. Avoid 1 GB plans for gateway + Docker. **Yours is a CX23 (2 vCPU, 4 GB, 40 GB),** which should fit Hermes plus light Docker jobs (an estimate, not a published figure). Measure it with `free -m` and `docker stats` before adding work.
 
 **Two ways to start coding work from Telegram:**
 
 | Route | How | Notes |
 |---|---|---|
-| A. Cloud trigger (preferred, laptop can be off) | Hermes makes one HTTP call to a [Claude Code cloud scheduled task](https://code.claude.com/docs/en/routines) API trigger (`/fire`). Or it posts an `@claude` comment or label on a GitHub issue, which [claude-code-action](https://github.com/anthropics/claude-code-action) picks up | Scheduled tasks are a **research preview** (Pro+; 30 fires/h per task); only a per-task token sits on the VPS. With claude-code-action, set `allowed_bots` if Hermes posts as a bot; a PAT posts as you. For Codex in Actions, use [openai/codex-action](https://github.com/openai/codex-action) (API key only) |
-| B. Run CLIs on the VPS | `claude -p` / `codex exec` in Hermes's **`docker`** terminal backend, with the CLIs baked into `terminal.docker_image` | Fine for light jobs (summaries, review of a small diff). On a minimal Hetzner box, don't plan full .NET + React builds and tests. Any token in `docker_forward_env` is readable by the agent |
+| A. Cloud trigger (preferred, laptop can be off) | Hermes makes one HTTP call to a [Claude Code cloud scheduled task](https://code.claude.com/docs/en/routines) (formerly "routines") API trigger: `POST …/v1/claude_code/routines/<id>/fire`. Or it posts an `@claude` comment or a `claude` label on a GitHub issue, which [claude-code-action](https://github.com/anthropics/claude-code-action) (`@v1`) picks up | Scheduled tasks are a **research preview** (Pro and above; beta header `experimental-cc-routine-2026-04-01`; API may change). Limits: 30 runs/h per task (shared with Run now) and 100 API fires/h per account. Only a per-task token sits on the VPS; it's created and rotated on the web only. Text you send arrives as an untrusted payload, so the task's saved prompt must say to act on it. Cloud runs always bill your subscription. **claude-code-action doesn't open a PR by default:** it pushes to a `claude/` branch and posts a pre-filled PR link. The poster needs write access, and comments made with `GITHUB_TOKEN` don't trigger workflows, so Hermes posts with a fine-grained PAT (acting as you, no `allowed_bots` needed) or a GitHub App (then list it in `allowed_bots`). For Codex in Actions, use [openai/codex-action](https://github.com/openai/codex-action) (`@v1`, v1.13 in Oct 2026): it documents only an OpenAI or Azure OpenAI API key |
+| B. Run CLIs on the VPS | `claude -p` / `codex exec` in Hermes's **`docker`** terminal backend (`terminal.backend: docker`), with the CLIs baked into `terminal.docker_image` (default `nousresearch/hermes-sandbox:desktop`) | Fine for light jobs (summaries, review of a small diff). On a minimal Hetzner box, don't plan full .NET + React builds and tests. Any variable in `terminal.docker_forward_env` can be read and exfiltrated by code in the container, so forward only the one token the job needs |
 
-Skip Remote Control for this (it needs the laptop on), and don't point Hermes's `ssh` backend at the laptop (it may be asleep).
+Skip Remote Control for this (the host has to stay on with `claude` running, and setup-token tokens can't open sessions), and don't point Hermes's `ssh` backend at the laptop (it may be asleep).
 
 **Auth on the VPS:**
-- **Claude:** `claude setup-token` creates a one-year `CLAUDE_CODE_OAUTH_TOKEN` (Pro/Max and above).
-  - It's for model requests only: it doesn't work with `--bare`, Remote Control or claude.ai connectors.
+- **Claude:** `claude setup-token` creates a one-year `CLAUDE_CODE_OAUTH_TOKEN` (Pro, Max, Ultra, Team or Enterprise). Anthropic documents it "for CI pipelines and scripts".
+  - It's for model requests only: it can't open Remote Control sessions or fetch claude.ai connectors, and `--bare` doesn't read it. Locally configured MCP servers still work.
   - Run unmodified `claude -p` for yourself only.
-  - **Never set that token as Hermes's own model provider.** Anthropic's terms forbid routing plan credentials through third-party apps. Whether "your own bot invokes unmodified `claude -p`" is fine is an interpretation, not explicitly documented; for heavy always-on automation, use an API key.
-  - A stray `ANTHROPIC_API_KEY` overrides the token and silently switches you to API billing.
-  - Without `--bare`, repo hooks and `.mcp.json` run without a trust prompt, so use trusted repos only.
-- **Codex:** `codex login --device-auth` (beta) or `codex login --with-api-key`. OpenAI recommends API keys for automation.
+  - **Never set that token as Hermes's own model provider.** Anthropic explicitly forbids routing plan credentials through third-party apps. It explicitly allows signing in to the unmodified Claude Code binary with your own plan, and the Consumer Terms (s.3(7)) ban bot or script access "except … via an API Key or where we otherwise explicitly permit it". A personal bot running unmodified `claude -p` isn't named either way (watch). Its closest match is the permitted "scripts" use. For heavy always-on automation, use an API key.
+  - A stray `ANTHROPIC_API_KEY` (or `ANTHROPIC_AUTH_TOKEN`) overrides the OAuth token and silently switches you to API billing.
+  - Without `--bare`, a `-p` run executes the repo's hooks and `.mcp.json` servers with no trust prompt. Subscription runs can't use `--bare`, and `--bare` will become the `-p` default in a future release, so use trusted repos or an isolated clone only. Watch for how subscription runs work once the default flips.
+- **Codex ([auth docs](https://learn.chatgpt.com/docs/auth)):** `codex login --device-auth` (beta) or `codex login --with-api-key`. OpenAI recommends API keys for automation; ChatGPT tokens are for trusted private runners only.
 
 **Security checklist (do this before giving Hermes shell or GitHub access; maps to OWASP Agentic ASI01, 02, 03, 05, 06, 08):**
-- Set `TELEGRAM_ALLOWED_USERS=<your id>`, and never `GATEWAY_ALLOW_ALL_USERS`.
-- Set `approvals.mode: manual`, or `smart` plus `approvals.deny` globs for `git push --force`, repo deletion and similar. No YOLO mode.
-- Use the Docker terminal backend, and run `chmod 600 ~/.hermes/.env`.
+- **Stay on the latest release** (v0.22.2 at minimum). 2026 brought several CVEs, including a webhook auth bypass (CVE-2026-114463, High), a bundled-MCP-catalog supply-chain issue (CVE-2026-82021, Critical) and an RCE (CVE-2026-71963, High). These are mostly unreviewed, auto-imported GitHub advisory entries, and the repo itself lists none, but they line up with real fixes in the release history. Check [GitHub advisories for hermes-agent](https://github.com/advisories?query=hermes-agent) on every update.
+- Set `TELEGRAM_ALLOWED_USERS=<your numeric id>` (with no allowlist, everyone is denied by default). Never set `GATEWAY_ALLOW_ALL_USERS` or `*`.
+- Set `approvals.mode: manual`, or `smart` (the default) plus quoted `approvals.deny` globs for `git push --force`, repo deletion and similar. Never use `off` or YOLO (`--yolo`, `/yolo`, `HERMES_YOLO_MODE=1`).
+- Use the Docker terminal backend, keep `terminal.docker_forward_env` minimal, and run `chmod 600 ~/.hermes/.env`.
 - Give the PAT the least scope possible: fine-grained, limited to the repos it needs.
 - Treat Telegram messages, issue bodies and PR comments as untrusted input. Prompt injection is ASI01.
 - No work code or work credentials on the VPS.
 
-Exercise (VPS): from Telegram, have Hermes open an issue with an `@claude` comment on a pet-project repo → claude-code-action opens a PR → Hermes reports the PR link back. Then do the same with a scheduled-task `/fire` call.
+Exercise (VPS): from Telegram, have Hermes open an issue with an `@claude` comment on a pet-project repo → claude-code-action pushes a `claude/` branch with a PR link → Hermes reports the link back. Then do the same with a scheduled-task `/fire` call.
 
 ---
 

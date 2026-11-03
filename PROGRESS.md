@@ -35,7 +35,9 @@ Tracks the phases in [ROADMAP.md](ROADMAP.md). Tick items as you finish them, an
   - [ ] Codex shows up as an Agent HQ partner agent
   - [ ] Any non-OpenAI model in the picker (Gemini, Grok, Kimi, MAI)? This decides between cross-vendor and cross-tier review
 - VPS (Hermes, ROADMAP §5.1):
-  - [ ] Note the exact Hetzner plan (vCPU / RAM)
+  - [x] Note the exact Hetzner plan: CX23, 2 vCPU / 4 GB / 40 GB (2026-11-02)
+  - [ ] **Upgrade Hermes** from the local build v0.22.0+119 (2026-09-24) to the latest release (v0.22.6 on 2026-11-02; v0.22.2 minimum, for the 2026 CVE fixes, ROADMAP §5.1)
+  - [ ] After the upgrade, check RAM headroom with `free -m` and `docker stats` while a Docker-backend job runs
   - [ ] Check the security checklist in §5.1 against the current Hermes config (allowed users, approvals mode, backend)
   - [ ] Which Claude plan do you have: Pro, or Max/Ultra?
 - Home: OpenAI access for codex-plugin-cc
