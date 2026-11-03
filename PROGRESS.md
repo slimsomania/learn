@@ -4,12 +4,13 @@ Tracks the phases in [ROADMAP.md](ROADMAP.md). Tick items as you finish them, an
 
 ## Current phase
 
-**Phase A: Single-agent mastery**. Started: _not yet_
+**Phase 0: Prerequisites** (Hermes upgrade + security checklist, admin questions, OpenAI access; see Open questions below). Started: _not yet_
 
 ## Phase status
 
 | Phase | Machine | Status | Started | Exit criterion met |
 |---|---|---|---|---|
+| 0. Prerequisites | VPS + work + home | not started | | |
 | A. Single-agent mastery | both | not started | | |
 | B. Coding-agent team | both | not started | | |
 | C. Multi-model + local | home | not started | | |

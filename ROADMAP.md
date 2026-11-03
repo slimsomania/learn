@@ -18,7 +18,7 @@ Status: canonical, living document. Progress is tracked in [PROGRESS.md](PROGRES
 | Q5 | How do I use different models together? | Model routing per role, cross-model review, and one API layer that can switch providers. | 4 |
 | Q6 | How do I run models locally? | Ollama / LM Studio / llama.cpp; Claude Code and Codex can point at a local server. | 7 |
 | Q7 | How do I build / train models? | Start with fine-tuning (LoRA via Unsloth/TRL); build-from-scratch (Karpathy, CS336) is a separate, long specialization. | 8 |
-| Q8 | Is LangGraph still relevant in 2026? | Yes, in Python agent apps, but not needed for running coding agents. For .NET, Microsoft Agent Framework comes first. | 6.3 |
+| Q8 | Is LangGraph still relevant in 2026? | Yes, in Python agent apps, but not needed for running coding agents. For .NET, Microsoft Agent Framework comes first. | 6.7 |
 | Q9 | What does the market actually ask for? | Agents, LLM integration, RAG, MCP, evals and observability, Python, Azure. Fine-tuning and certificates come much lower. | 11 |
 
 ---
@@ -27,14 +27,15 @@ Status: canonical, living document. Progress is tracked in [PROGRESS.md](PROGRES
 
 At about 8 hours/week:
 
-| Phase | Weeks | Goal | Exit criterion |
-|---|---|---|---|
-| A. Single-agent mastery | 1–2 | One harness configured properly on your repo | A feature shipped via plan → implement → verify with repo instruction files and two skills |
-| B. Coding-agent team | 3–6 | Implementer, tester and reviewer roles in worktrees, cross-model review, hook/CI gates | One React + .NET feature through the full loop, with metrics recorded |
-| C. Multi-model + local | 7–8 | Route roles to different models, including one local model | Same task run on 2–3 model setups with cost/quality compared |
-| D. Scripted orchestration | 9–10 | A script runs implement → test → review without you | Timeouts, retry limits and approval stop work; failures are visible |
-| E. Building agents | Months 3–5 | Agent apps in .NET (and Python if needed), MCP servers, evals, observability, security | MCP server + agent + 30-case eval suite running in CI |
-| F. Models | Month 6+ | Fine-tune a small open model; optionally learn transformers from scratch | A LoRA adapter that beats the prompt-only baseline on your eval set |
+| Phase | Machine | Weeks | Goal | Exit criterion |
+|---|---|---|---|---|
+| 0. Prerequisites | VPS + work + home | A few days, before week 1 | Close known security gaps; start the requests that take time | Hermes on the latest release with the §5.1 security checklist passed; §3.6 admin questions sent; OpenAI access for codex-plugin-cc decided ([PROGRESS.md](PROGRESS.md)) |
+| A. Single-agent mastery | both | 1–2 | One harness configured properly on your repo | A feature shipped via plan → implement → verify with repo instruction files and two skills; §10 metrics recorded for ≥3 single-agent tasks (your baseline) |
+| B. Coding-agent team | both | 3–6 | Weeks 3–4: implementer + reviewer, orchestrated by you (§3.4 level 1). Weeks 5–6: add tester and planner as subagents (level 2), kept only if the metrics show they help. Worktrees, cross-model review, hook/CI gates, §6.5 security rules | One React + .NET feature through the full loop; reviewer read-only via permissions; metrics compared with the Phase A baseline |
+| C. Multi-model + local | home | 7–8 | Route roles to different models by evidence; one local model as a background batch job (§7) | Same task run on 2–3 model setups with cost/quality compared |
+| D. Scripted orchestration | home; work variant in §5 | 9–12 | A script runs implement → test → review without you; Hermes can start it from Telegram | Timeouts, retry limits and approval stop work; failures are visible |
+| E. Building agents | both | Months 4–6 | Agent apps in .NET (and Python if needed), MCP servers, evals, observability, security, RAG | MCP server + agent + 30-case eval suite running in CI |
+| F. Models | home + cloud GPU | Month 7+ | Fine-tune a small open model first; theory (transformers from scratch) for depth after | A LoRA adapter that beats the prompt-only baseline on your eval set |
 
 Rule: if a phase's exit criterion isn't met, repeat the phase. Don't add more agents to fix it.
 
@@ -108,22 +109,25 @@ A handoff is valid only if it names an **exact commit** and says what was and wa
 
 | Level | Who orchestrates | Use when | Learn from |
 |---|---|---|---|
-| 1. Manual | You run sessions and pass artifacts | Weeks 3–6; always first | Sections 3.3 and 9 |
-| 2. Harness | Main Claude Code session + subagents / agent team; Copilot cloud agent per issue | Repeatable roles in one tool | [Subagents](https://code.claude.com/docs/en/sub-agents), [Agent teams](https://code.claude.com/docs/en/agent-teams), [Copilot cloud agent best practices](https://docs.github.com/en/copilot/tutorials/cloud-agent/get-the-best-results) |
-| 3. Code | Your script/service launches workers | Manual flow already works repeatedly | [Claude Code headless](https://code.claude.com/docs/en/headless), [Codex non-interactive](https://learn.chatgpt.com/docs/non-interactive-mode), [Claude Agent SDK](https://code.claude.com/docs/en/agent-sdk/overview) |
+| 1. Manual | You run sessions and pass artifacts | Phase B weeks 3–4; always first | Sections 3.3 and 9 |
+| 2. Harness | Main Claude Code session + subagents / agent team; Copilot cloud agent per issue | Phase B weeks 5–6 onward: repeatable roles in one tool | [Subagents](https://code.claude.com/docs/en/sub-agents), [Agent teams](https://code.claude.com/docs/en/agent-teams), [Copilot cloud agent best practices](https://docs.github.com/en/copilot/tutorials/cloud-agent/get-the-best-results) |
+| 3. Code | Your script/service launches workers | Phase D: the manual flow already works repeatedly | [Claude Code headless](https://code.claude.com/docs/en/headless), [Codex non-interactive](https://learn.chatgpt.com/docs/non-interactive-mode), [Claude Agent SDK](https://code.claude.com/docs/en/agent-sdk/overview) |
 
 **Gates are code, not prompts:** tests, type checks, linters, [Claude Code hooks](https://code.claude.com/docs/en/hooks) (exit code 2 blocks the action on events that support blocking, such as `PreToolUse`, and feeds stderr back to the agent; `PostToolUse` can't block, and exit 1 doesn't block), GitHub branch protection + required checks.
 
 ### 3.5 Materials for phases A–B
 
+Each row is tagged with its machine and phase. Phase A rows come first.
+
 | Item | Cost · time | Why |
 |---|---|---|
-| (home) [Claude Code in Action](https://academy.claude.com/courses/claude-code-in-action) (1 h) + [Introduction to subagents](https://academy.claude.com/courses/introduction-to-subagents) (45 min) + [Introduction to agent skills](https://academy.claude.com/courses/introduction-to-agent-skills) (1 h) | Free · ~3 h + practice | CLAUDE.md, permissions, hooks, headless, plugins; subagents and skills come from the two short courses |
-| (home) [Claude Code: A Highly Agentic Coding Assistant (DeepLearning.AI)](https://www.deeplearning.ai/short-courses/claude-code-a-highly-agentic-coding-assistant) | Free during DLAI beta (certificate needs Pro) · 2 h; updated Aug 2026 | Worktrees, parallel sessions, GitHub integration, hands-on |
-| (home) [Claude Code worktrees](https://code.claude.com/docs/en/worktrees) + [git worktree](https://git-scm.com/docs/git-worktree) (evergreen) | Free · 1 h | Isolation for parallel writers |
-| [Claude Code skills](https://code.claude.com/docs/en/skills) · [AGENTS.md](https://agents.md) | Free · 1 h | Shared instruction format; AGENTS.md (Agentic AI Foundation, Linux Foundation) is read by Codex, Copilot and others |
-| (work) [Copilot cloud agent module](https://learn.microsoft.com/en-us/training/modules/github-copilot-code-agent/) (~40 min) + [Copilot instructions & custom agents](https://learn.microsoft.com/en-us/training/modules/configure-customize-github-copilot-visual-studio-code/) (~1.7 h); optional skim: [Copilot Fundamentals Part 1](https://learn.microsoft.com/en-us/training/paths/copilot/) (only the Across Environments, Management/customization and Spaces modules) | Free · ~2.5 h (~7.6 h with the path) | Your work stack: `.github/copilot-instructions.md`, `.github/agents`, skills, issue → PR |
-| (home) [Codex docs: subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents), [Windows sandbox](https://learn.chatgpt.com/docs/windows/windows-sandbox) | Free · 2 h | Codex as your second harness / reviewer. Runs natively in PowerShell; WSL optional |
+| (home, A) [Claude Code in Action](https://academy.claude.com/courses/claude-code-in-action) (1 h) + [Introduction to subagents](https://academy.claude.com/courses/introduction-to-subagents) (45 min) + [Introduction to agent skills](https://academy.claude.com/courses/introduction-to-agent-skills) (1 h) | Free · ~3 h + practice | CLAUDE.md, permissions, hooks, headless, plugins; subagents and skills come from the two short courses |
+| (both, A) [Claude Code skills](https://code.claude.com/docs/en/skills) · [AGENTS.md](https://agents.md) | Free · 1 h | Shared instruction format; AGENTS.md (Agentic AI Foundation, Linux Foundation) is read by Codex, Copilot and others |
+| (work, A) [Copilot cloud agent module](https://learn.microsoft.com/en-us/training/modules/github-copilot-code-agent/) (~40 min) + [Copilot instructions & custom agents](https://learn.microsoft.com/en-us/training/modules/configure-customize-github-copilot-visual-studio-code/) (~1.7 h); optional skim: [Copilot Fundamentals Part 1](https://learn.microsoft.com/en-us/training/paths/copilot/) (only the Across Environments, Management/customization and Spaces modules) | Free · ~2.5 h (~7.6 h with the path) | Your work stack: `.github/copilot-instructions.md`, `.github/agents`, skills, issue → PR |
+| (home, B) [Claude Code: A Highly Agentic Coding Assistant (DeepLearning.AI)](https://www.deeplearning.ai/short-courses/claude-code-a-highly-agentic-coding-assistant) | Free during DLAI beta (certificate needs Pro) · 2 h; updated Aug 2026 | Worktrees, parallel sessions, GitHub integration, hands-on |
+| (home, B) [Claude Code worktrees](https://code.claude.com/docs/en/worktrees) + [git worktree](https://git-scm.com/docs/git-worktree) (evergreen) | Free · 1 h | Isolation for parallel writers |
+| (home, B) [Codex docs: subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents), [Windows sandbox](https://learn.chatgpt.com/docs/windows/windows-sandbox) | Free · 2 h | Codex as your second harness / reviewer. Runs natively in PowerShell; WSL optional |
+| (both, B) §6.5 security: the OWASP Agentic Top 10 and the practical rules | Free · ~2 h | Required before agents get shell, git or network access. It sits in §6 because Phase E builds on it |
 
 Windows note: everything works natively except the agent-teams split-pane view, which needs tmux and doesn't work in Windows Terminal or the VS Code terminal (use the default in-process mode).
 
@@ -161,17 +165,21 @@ Everything in 3.1–3.4 maps onto Copilot Business/Enterprise:
   - Rely on tests and CI as the real gate.
   - Measure whether this catches defects (§10) rather than assuming it does.
 
-**Ask your admin about** (only the ones you don't already have): the Copilot CLI policy, the cloud agent, the Codex partner-agent policy, and any non-OpenAI models. Anthropic models and the Claude agent stay disabled through per-model toggles. The org-level toggle is in public preview, and whether it also covers code review, the cloud agent and the CLI isn't verified (see GitHub's "Supported surfaces for Copilot policies").
+**Phase 0: ask your admin before week 1** (the answers decide how Phase B works at work), only about the ones you don't already have: the Copilot CLI policy, the cloud agent, the Codex partner-agent policy, and any non-OpenAI models. Anthropic models and the Claude agent stay disabled through per-model toggles. The org-level toggle is in public preview, and whether it also covers code review, the cloud agent and the CLI isn't verified (see GitHub's "Supported surfaces for Copilot policies").
 
 Last verified: Nov 2, 2026.
 
-Exercise (work): create `implementer`, `tester` and `reviewer` agent files with three different pinned models, run one real ticket through `/fleet` → PR → Copilot code review + your reviewer agent, and record the §10 metrics.
+Exercise (work, Phase B; needs the admin answers): weeks 3–4, create `implementer` and `reviewer` agent files pinned to different models and run one real ticket → PR → Copilot code review + your reviewer agent. Weeks 5–6, add a `tester` agent file and run a ticket through `/fleet` if you have the Copilot CLI. Record the §10 metrics.
 
-Exercise (Phase B): implement a React list + .NET endpoint feature. Planner writes `spec.md` with the API contract → two implementers in two worktrees → tester writes tests from the spec → Codex reviews the exact merge commit → you accept/reject each finding → CI merges. Record the metrics from section 10.
+Exercise (home, Phase B): implement a React list + .NET endpoint feature in two steps.
+1. Weeks 3–4 (level 1): you write `spec.md` with the API contract → one implementer in a worktree → Codex reviews the exact commit → you accept/reject each finding → CI merges.
+2. Weeks 5–6 (level 2): add a planner subagent that writes the spec, a second implementer in its own worktree, and a tester that writes tests from the spec. Keep each role only if the §10 metrics show it helps against your Phase A baseline.
 
 ---
 
 ## 4. Working with different models together (Q5)
+
+Phase B uses the cross-model review rows. Phase C adds per-role routing and the evidence comparison.
 
 | Technique | What it is | How to do it |
 |---|---|---|
@@ -189,7 +197,9 @@ Two models agreeing doesn't prove the code is correct. Tests and your judgment d
 
 ## 5. Scripted orchestration (Phase D)
 
-Build a small coordinator **around existing harnesses**; don't rewrite the agent loop.
+Build a small coordinator **around existing harnesses**; don't rewrite the agent loop. Weeks 9–10: the coordinator at home. Weeks 11–12: the Hermes trigger (§5.1 exercise) and the work variant.
+
+**Work variant (Copilot only):** not yet written; it's waiting on a research-topic pass (see [validation-log.md](validation-log.md)).
 
 ```text
 task intake → validate scope → git worktree add → launch implementer (headless, JSON output)
@@ -233,7 +243,7 @@ Skip Remote Control for this (the host has to stay on with `claude` running, and
   - Without `--bare`, a `-p` run executes the repo's hooks and `.mcp.json` servers with no trust prompt. Subscription runs can't use `--bare`, and `--bare` will become the `-p` default in a future release, so use trusted repos or an isolated clone only. Watch for how subscription runs work once the default flips.
 - **Codex ([auth docs](https://learn.chatgpt.com/docs/auth)):** `codex login --device-auth` (beta) or `codex login --with-api-key`. OpenAI recommends API keys for automation; ChatGPT tokens are for trusted private runners only.
 
-**Security checklist (do this before giving Hermes shell or GitHub access; maps to OWASP Agentic ASI01, 02, 03, 05, 06, 08):**
+**Security checklist (Phase 0: your Hermes already runs, so do this now, before giving it shell or GitHub access; maps to OWASP Agentic ASI01, 02, 03, 05, 06, 08):**
 - **Stay on the latest release** (v0.22.2 at minimum). 2026 brought several CVEs, including a webhook auth bypass (CVE-2026-114463, High), a bundled-MCP-catalog supply-chain issue (CVE-2026-82021, Critical) and an RCE (CVE-2026-71963, High). These are mostly unreviewed, auto-imported GitHub advisory entries, and the repo itself lists none, but they line up with real fixes in the release history. Check [GitHub advisories for hermes-agent](https://github.com/advisories?query=hermes-agent) on every update.
 - Set `TELEGRAM_ALLOWED_USERS=<your numeric id>` (with no allowlist, everyone is denied by default). Never set `GATEWAY_ALLOW_ALL_USERS` or `*`.
 - Set `approvals.mode: manual`, or `smart` (the default) plus quoted `approvals.deny` globs for `git push --force`, repo deletion and similar. Never use `off` or YOLO (`--yolo`, `/yolo`, `HERMES_YOLO_MODE=1`).
@@ -242,7 +252,7 @@ Skip Remote Control for this (the host has to stay on with `claude` running, and
 - Treat Telegram messages, issue bodies and PR comments as untrusted input. Prompt injection is ASI01.
 - No work code or work credentials on the VPS.
 
-Exercise (VPS): from Telegram, have Hermes open an issue with an `@claude` comment on a pet-project repo → claude-code-action pushes a `claude/` branch with a PR link → Hermes reports the link back. Then do the same with a scheduled-task `/fire` call.
+Exercise (VPS, Phase D weeks 11–12): from Telegram, have Hermes open an issue with an `@claude` comment on a pet-project repo → claude-code-action pushes a `claude/` branch with a PR link → Hermes reports the link back. Then do the same with a scheduled-task `/fire` call.
 
 ---
 
@@ -250,10 +260,12 @@ Exercise (VPS): from Telegram, have Hermes open an issue with an `@claude` comme
 
 ### 6.1 Foundations (pick in this order)
 
+Work through §6 in order: 6.1–6.5 feed the capstone, 6.6 RAG comes next, and 6.7 is optional.
+
 | # | Item | Cost · time | What you get |
 |---|---|---|---|
 | 1 | [Agentic AI, Andrew Ng (DeepLearning.AI)](https://www.deeplearning.ai/courses/agentic-ai/) | Audit free; graded work Pro ($25–30/mo) · ~10 h | Reflection, tool use (incl. MCP), planning, multi-agent, error analysis in Python, from first principles before frameworks |
-| 2 | [Building with the Claude API (Skilljar)](https://anthropic.skilljar.com/claude-with-the-anthropic-api) (home only) | Free · ~8 h (not stated on page) | Tool use, structured output, RAG, prompt caching, agent loop from first principles |
+| 2 | Optional, home only: [Building with the Claude API (Skilljar)](https://anthropic.skilljar.com/claude-with-the-anthropic-api) | Free · ~8 h (not stated on page) | Tool use, structured output, RAG, prompt caching. Overlaps #1 on the agent loop, so take it only if you build on the Claude API at home |
 | 3 | [Writing effective tools for agents, Anthropic](https://www.anthropic.com/engineering/writing-tools-for-agents) (Sep 2025; evergreen) | Free · 20 min read, 1 h with applying it | Tool naming, descriptions, response shaping: the most common cause of bad agents |
 
 ### 6.2 .NET first: Microsoft Agent Framework (your highest-leverage build skill)
@@ -269,17 +281,7 @@ Successor to Semantic Kernel + AutoGen (the AutoGen repo is now archived). GA si
 
 Check package status: the core packages are stable, but some integrations are still beta (Python `-a2a`, `-azure-ai-search`, `-copilotstudio`; .NET `Microsoft.Agents.AI.Foundry` is on a preview line), and DevUI, hosted agents and Skills are preview. Pin versions. (Last verified: Nov 2, 2026.)
 
-### 6.3 Python: LangGraph, yes or no? (Q8)
-
-- **Still relevant.** LangGraph 1.2.x (stable) is the most-downloaded Python agent-orchestration framework (~45M PyPI downloads/month in Nov 2026, vs ~12M for the OpenAI Agents SDK), and it appears in ~4.3k US AI job postings in 2025, up from 194 in 2024 (Stanford AI Index 2026, Lightcast data). [Thoughtworks Radar Vol. 34](https://www.thoughtworks.com/radar/languages-and-frameworks/langgraph) (Apr 2026) moved it from Adopt to Trial: "no longer the default choice for building every agentic system".
-- **Not needed for Phases A–D.** Coding-agent teams run on Claude Code / Codex / Copilot, not on LangGraph.
-- **Learn it if** you build stateful Python agent services (checkpoints, human-in-the-loop, durable execution).
-- **Which course:** [Quickstart: LangGraph Essentials (Python)](https://academy.langchain.com/courses/langgraph-essentials-python) (free, ~1 h, 13 lessons) + [LangGraph docs](https://docs.langchain.com/oss/python/langgraph/overview). The longer "Introduction to LangGraph" (free, ~6 h) is an optional deep dive.
-- **Alternative:** [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) (lighter, handoffs built in; v0.24, still pre-1.0). Pick **one** Python framework.
-
-Last verified: Nov 2, 2026.
-
-### 6.4 MCP (tools) and A2A (agent ↔ agent)
+### 6.3 MCP (tools) and A2A (agent ↔ agent)
 
 | Item | Cost · time | Why |
 |---|---|---|
@@ -290,7 +292,7 @@ Last verified: Nov 2, 2026.
 
 Last verified: Nov 2, 2026.
 
-### 6.5 Evals and observability (the skill that separates demos from production)
+### 6.4 Evals and observability (the skill that separates demos from production)
 
 | Item | Cost · time | Why |
 |---|---|---|
@@ -301,24 +303,36 @@ Last verified: Nov 2, 2026.
 | [Langfuse docs](https://langfuse.com/docs) (open source) or LangSmith | Free tier (Hobby: 50k units/mo, 30-day data); self-host free | Trace viewer, datasets, eval runs. Owned by ClickHouse since Jan 2026; core stays MIT. At work, check company policy first |
 | [Aspire dashboard (standalone)](https://aspire.dev/dashboard/standalone/) | Free (MIT) · one Docker container (`mcr.microsoft.com/aspire/dashboard`, UI :18888, OTLP :4317/:4318) | **Work-side default** trace viewer for .NET: OTel traces with a GenAI visualizer for spans that carry GenAI semconv attributes (since Aspire 9.5; current 13.6). The docs don't say explicitly that the standalone image includes the visualizer, so confirm it hands-on |
 
-### 6.6 Security (do this before agents get shell/git/network access, so in Phase B)
+### 6.5 Security (do this before agents get shell/git/network access, so in Phase B)
 
 - [OWASP Top 10 for Agentic Applications 2026](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/) (Dec 2025): ASI01 agent goal hijack, ASI02 tool misuse, ASI06 memory & context poisoning, and more; guiding principle "least agency".
 - [OWASP Top 10 for LLM Applications](https://genai.owasp.org/llm-top-10/) (2025 edition, current; evergreen): LLM01 prompt injection is still #1; also read LLM06 excessive agency.
 - Optional: [Red Teaming LLM Applications (DeepLearning.AI)](https://www.deeplearning.ai/short-courses/red-teaming-llm-applications/): free, ~1.7 h, built on Giskard and chatbot-focused. Skip it if you read the OWASP lists or take the Maven course.
 - Practical rules: least-privilege tools, no production secrets in agent env, reviewer read-only via permissions (not via the prompt), treat issues/docs/tool output as untrusted input, cap retries and spend.
 
-### 6.7 RAG (only when an agent needs private or changing knowledge)
+### 6.6 RAG (only when an agent needs private or changing knowledge)
 
 - [Retrieval Augmented Generation (DeepLearning.AI)](https://www.deeplearning.ai/courses/retrieval-augmented-generation-rag/): free audit (certificate paid) · ~26 h video, so take modules 2, 3 and 5 only: BM25 + vector hybrid search, chunking, reranking, retrieval and generation evals. RAG is in about 40% of AI-engineer postings (section 11).
 
-§6.5–6.7 last verified: Nov 2, 2026.
+§6.4–6.6 last verified: Nov 2, 2026.
+
+### 6.7 Python: LangGraph, yes or no? (Q8, optional)
+
+- **Still relevant.** LangGraph 1.2.x (stable) is the most-downloaded Python agent-orchestration framework (~45M PyPI downloads/month in Nov 2026, vs ~12M for the OpenAI Agents SDK), and it appears in ~4.3k US AI job postings in 2025, up from 194 in 2024 (Stanford AI Index 2026, Lightcast data). [Thoughtworks Radar Vol. 34](https://www.thoughtworks.com/radar/languages-and-frameworks/langgraph) (Apr 2026) moved it from Adopt to Trial: "no longer the default choice for building every agentic system".
+- **Not needed for Phases A–D** or the Phase E capstone. Coding-agent teams run on Claude Code / Codex / Copilot, not on LangGraph.
+- **Learn it if** you build stateful Python agent services (checkpoints, human-in-the-loop, durable execution).
+- **Which course:** [Quickstart: LangGraph Essentials (Python)](https://academy.langchain.com/courses/langgraph-essentials-python) (free, ~1 h, 13 lessons) + [LangGraph docs](https://docs.langchain.com/oss/python/langgraph/overview). The longer "Introduction to LangGraph" (free, ~6 h) is an optional deep dive.
+- **Alternative:** [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) (lighter, handoffs built in; v0.24, still pre-1.0). Pick **one** Python framework.
+
+Last verified: Nov 2, 2026.
 
 Phase E capstone: a .NET MCP server over one internal API → an Agent Framework agent using it → 30 eval cases in CI → OTel traces in Aspire/Langfuse → OWASP checklist passed.
 
 ---
 
 ## 7. Running models locally (Q6)
+
+Phase C uses §7.2–7.3 for one small local model in a background job. The rest of §7 is reference for Phase F, which serves its fine-tuned model this way.
 
 ### 7.1 What to learn
 
@@ -354,7 +368,12 @@ Phase E capstone: a .NET MCP server over one internal API → an Agent Framework
 - Local inference ≠ private by default: plugins, telemetry and MCP servers can still send data out.
 - A CPU-only VPS isn't faster than your laptop; its only advantage is being always on. Use it at most for tiny always-on helpers for Hermes (classification, short summaries). Don't rent a VPS for inference.
 
-Phase C exercise (home): run the same Phase-B task with (a) Claude only, (b) Claude implementer + a second-vendor reviewer (Codex via codex-plugin-cc, or Gemini via `agy`), (c) a local `qwen3.5:4b` generating test stubs as a background script. Compare accepted-change time, defects, cost. For a local model as a real interactive role, rent a GPU for a few hours and serve a ~27B model instead.
+Phase C exercise (home): run the same Phase-B task under three setups. Keep the Phase B cross-model reviewer in all of them (Codex via codex-plugin-cc, optionally Gemini via `agy`).
+- (a) One model for every role.
+- (b) Per-role routing (§4): the strongest model for planning and review, a cheaper one for tests, search and boilerplate.
+- (c) Setup (b) plus a local `qwen3.5:4b` generating test stubs as a background script.
+
+Compare accepted-change time, defects and cost. For a local model as a real interactive role, rent a GPU for a few hours and serve a ~27B model instead.
 
 §7 last verified: Nov 2, 2026. Watch: newly posted small tool-capable models (nemotron-3.5-bolt e4b, nimble-v3 9b, bonsai-2 4b/9b) have no independent evals yet.
 
@@ -362,14 +381,14 @@ Phase C exercise (home): run the same Phase-B task with (a) Claude only, (b) Cla
 
 ## 8. Building and adapting models (Q7)
 
-Order matters. Each step has a concrete output.
+Practice comes first: steps 1–2 (~12–17 h) meet the Phase F exit criterion. Steps 3–6 add depth; take them once you have a working adapter. Each step has a concrete output.
 
 | Step | Resource | Cost · time | Output |
 |---|---|---|---|
-| 1. How LLMs work, in code | [Neural Networks: Zero to Hero, Andrej Karpathy](https://karpathy.ai/zero-to-hero.html) (evergreen) | Free · ~14.5 h video, 20–30 h with coding | You write a GPT from scratch in PyTorch |
-| 2. Transformers ecosystem | [Hugging Face LLM Course](https://huggingface.co/learn/llm-course/chapter1/1) | Free · ~36–48 h for ch. 1–3 + 10–12 (full course ~72–96 h) | Tokenizers, datasets, fine-tuning with `transformers` |
-| 3. Practical fine-tuning | [Unsloth docs](https://unsloth.ai/docs) (LoRA on a single consumer GPU or free Colab; Unsloth Studio is a browser UI) + [Hugging Face TRL](https://huggingface.co/docs/trl) (v1.x: SFT, DPO, GRPO stable; ORPO/CPO experimental) | Free · 10–15 h | A LoRA adapter on your own dataset, exported to GGUF and served by Ollama |
-| 4. Post-training theory | [Post-training of LLMs (DeepLearning.AI)](https://www.deeplearning.ai/short-courses/post-training-of-llms/) | Free during DLAI beta (certificate needs Pro) · ~1.5 h | When to use SFT vs DPO vs RL |
+| 1. Post-training theory | [Post-training of LLMs (DeepLearning.AI)](https://www.deeplearning.ai/short-courses/post-training-of-llms/) | Free during DLAI beta (certificate needs Pro) · ~1.5 h | When to use SFT vs DPO vs RL |
+| 2. Practical fine-tuning | [Unsloth docs](https://unsloth.ai/docs) (LoRA on a single consumer GPU or free Colab; Unsloth Studio is a browser UI) + [Hugging Face TRL](https://huggingface.co/docs/trl) (v1.x: SFT, DPO, GRPO stable; ORPO/CPO experimental) | Free · 10–15 h | A LoRA adapter on your own dataset, exported to GGUF and served by Ollama |
+| 3. How LLMs work, in code | [Neural Networks: Zero to Hero, Andrej Karpathy](https://karpathy.ai/zero-to-hero.html) (evergreen) | Free · ~14.5 h video, 20–30 h with coding | You write a GPT from scratch in PyTorch |
+| 4. Transformers ecosystem | [Hugging Face LLM Course](https://huggingface.co/learn/llm-course/chapter1/1) | Free · ~36–48 h for ch. 1–3 + 10–12 (full course ~72–96 h) | Tokenizers, datasets, fine-tuning with `transformers` |
 | 5. Full training run (optional) | [karpathy/nanochat](https://github.com/karpathy/nanochat) | ~$48 of rented GPU (~2 h on 8×H100 at ~$3/GPU-h; ~$15 on spot) | Tokenizer → pretrain → SFT → RL → chat UI, end to end |
 | 6. Research depth (optional) | [Stanford CS336: Language Modeling from Scratch](https://cs336.stanford.edu/) (Spring 2026 offering; videos on YouTube, assignments on GitHub) | Free materials · 100+ h; assignments need GPU time (Modal gives $30/mo free) | Needs linear algebra, probability, PyTorch, GPU budget |
 
@@ -496,7 +515,7 @@ Pick at most one, after Phase E: GH-300 or AI-103.
 | MCP | Phase E (build), used from Phase A | Needed for building; just consumed while operating |
 | Evals | Free DeepLearning.AI + Hamel's FAQ first; Maven optional | Maven costs $4,400 (Nov 2026); free material covers the core |
 | Local models | Own phase (C) + Ollama → Claude Code integration | Claude file had almost nothing on local inference |
-| Building models | Karpathy → HF → Unsloth/TRL → nanochat → CS336 | Neither file had a hands-on path from zero to a fine-tuned model |
+| Building models | Post-training → Unsloth/TRL → Karpathy → HF → nanochat → CS336 | Neither file had a hands-on path from zero to a fine-tuned model; practice comes first so the Phase F exit is reachable in weeks |
 | Handoff / communication | Explicit mechanisms + Spec Kit + templates | Your main gap; neither file answered it directly |
 | Security | Moved to Phase B | Agents get shell/git access from the start |
 | Windows | Native; WSL2 only for agent-team split panes | Resolves the two files' disagreement |
@@ -505,17 +524,33 @@ Pick at most one, after Phase E: GH-300 or AI-103.
 
 ## 13. Completion checklist
 
-**Operating a coding-agent team (Phases A–D)**
+**Prerequisites (Phase 0)**
+- [ ] Hermes on the latest release (v0.22.2 at minimum) and the §5.1 security checklist passed
+- [ ] §3.6 admin questions sent; answers recorded in PROGRESS.md
+- [ ] OpenAI access for codex-plugin-cc decided (API key or ChatGPT plan)
+
+**Single agent (Phase A)**
 - [ ] Repo has CLAUDE.md / AGENTS.md / copilot-instructions.md with exact build/test commands
-- [ ] Two skills and three role files (implementer, tester, reviewer) committed
+- [ ] Two skills committed
+- [ ] Baseline: §10 metrics for ≥3 single-agent tasks
+
+**Coding-agent team (Phase B)**
+- [ ] Implementer and reviewer role files committed; tester and planner only if the metrics justified them
 - [ ] Reviewer is read-only via permissions, not via prompt
 - [ ] Parallel work uses worktrees with separate ports/DBs
 - [ ] Every handoff names an exact commit and lists checks not run
 - [ ] Cross-model review set up: home = codex-plugin-cc (optionally Gemini via `agy`); work = role agents pinned to different non-Anthropic models + Agent HQ Codex
 - [ ] Hooks/CI block merges on failing checks
-- [ ] Metrics recorded for ≥5 tasks: single agent vs team
-- [ ] One local model used in a real role
+- [ ] §6.5 practical security rules applied to agent permissions and environment
+- [ ] Metrics recorded for ≥5 tasks: team vs the Phase A baseline
+
+**Multi-model + local (Phase C)**
+- [ ] Same task run under 2–3 model setups; cost and quality compared
+- [ ] One local model running an offline batch job, with its output measured
+
+**Scripted orchestration (Phase D)**
 - [ ] A script runs implement → test → review with timeouts and retry limits
+- [ ] One job started from Telegram via Hermes, with the result reported back
 
 **Building agents (Phase E)**
 - [ ] Wrote an agent loop without a framework (Claude/OpenAI API)

@@ -13,6 +13,21 @@ Open: <anything the learner must decide>
 
 ---
 
+## 2026-11-02: Structure and phase order of ROADMAP.md (§0–§13), no resource claims re-checked
+Validators: 1 structural read-through (internal consistency only; no web checks, no links changed) · Verdict: phase order A→F is sound; 11 structural issues found
+Findings:
+- Sequencing: Hermes upgrade + security checklist (§5.1) is filed under Phase D, but Hermes already runs below the v0.22.2 CVE minimum, so it belongs before Phase A. Admin questions (§3.6) and the OpenAI access decision (PROGRESS) have lead time and gate Phase B, but no phase owns them.
+- Phase A has no baseline metrics, yet Phase B and §13 compare "single agent vs team" (§10 says baseline first).
+- §3.1 says start with implementer + reviewer only; the Phase B exercise uses planner + 2 implementers + tester + reviewer at once. §3.4 level 2 (harness subagents) is not assigned to any phase.
+- Phase C exercise (b) repeats Phase B's cross-model review. §13 "one local model used in a real role" contradicts §7.3 (offline batch jobs only on this laptop). §7 (Phase C material) sits after §6 (Phase E) with no phase label.
+- §6.6 and §12 say security moved to Phase B, but Phase B's goal, exit criterion and §3.5 materials don't include it.
+- §6 order puts optional LangGraph (§6.3) before MCP, evals and security, which the capstone needs; §6.1 stacks two first-principles agent-loop courses (pick-don't-stack).
+- §8 puts ~60–80 h of theory (Karpathy, HF course) before the first fine-tune, so the Phase F exit criterion is ~2 months away at 8 h/week.
+- §1 table has no machine column (CLAUDE.md convention; PROGRESS has one). Phase D has no work-side (Copilot-only) content although PROGRESS lists "then work".
+- §13 groups A–D in one list, so it can't serve as per-phase exit checks.
+Edits (approved by the learner, same day): §1 new Phase 0 + Machine column, A baseline metrics, B split into weeks 3–4 / 5–6 with security in the exit, D 9–12 wk, E months 4–6, F month 7+ · §3.4 levels mapped to phases · §3.5 rows tagged machine + phase, security row added · §3.6 admin questions = Phase 0; work and home exercises split into two steps · §4 and §7 phase intros; Phase C exercise reworked (one model / routing / + local batch) · §5 week split + work-variant placeholder; §5.1 checklist = Phase 0 · §6 reordered: MCP 6.3, evals 6.4, security 6.5, RAG 6.6, LangGraph 6.7 (optional); Claude API course optional · §8 practice first (post-training → Unsloth/TRL → Karpathy → HF → nanochat → CS336) · §12 row updated · §13 per-phase checklist · PROGRESS.md Phase 0 row and current phase
+Open: work-side Phase D needs a research-topic pass before it can be written
+
 ## 2026-11-02: Full revalidation sweep of ROADMAP.md (§2–§12), triggered by the learner spotting a supersession banner on "Building effective agents"
 Validators: 13 independent passes (12 by section + 1 follow-up), ~110 claims · Kept: ~80 (≈60 of them with wording, version or time fixes; 9 marked evergreen) · Replaced: 13 (mostly moved URLs: Codex docs ×3 → learn.chatgpt.com, OTel GenAI semconv → own repo, Unsloth → unsloth.ai/docs, Aspire → aspire.dev, MS Learn deep links ×3, Claude Academy root ×2, MAF Learn path, Claude cert; plus the Agent SDK billing claim, the Copilot model list and the MAF "prerelease" claim) · Downgraded to optional: 11 · Dropped: 4 claims (Digital Applied MCP stat, "LangGraph intro predates v1", Ollama "≥0.14.3 for streaming tool calls", `/fleet` "no messaging") · Unverified, kept as watch or caveat: 8
 Process gap found: "Building effective agents" (Dec 2024) was pre-approved as evergreen in CLAUDE.md, so nobody re-read it and the author's "much of the tooling landscape … has changed" banner was missed. Fixes: CLAUDE.md criterion 5 (evergreen is never pre-approved; re-read for supersession notes) and resource-validator step 1 (quote banners, report redirects, mark unreadable PDFs Unverified). Three PDFs that the validators couldn't parse (OpenAI guide, Stanford AI Index pp. 200–212, LinkedIn Aug 2026) were read with `pdftotext`; their figures were confirmed.
