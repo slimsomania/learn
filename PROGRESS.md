@@ -22,6 +22,10 @@ Tracks the phases in [ROADMAP.md](ROADMAP.md). Tick items as you finish them, an
 
 | Date | Item | Hours | Shipped practice output | Notes |
 |---|---|---|---|---|
+| 2026-11-05 | §2 Read first: Building effective agents (Anthropic) | | [notes/section-2-core-concepts.md](notes/section-2-core-concepts.md) | Five patterns; skip the tooling section |
+| 2026-11-05 | §2 Read first: A practical guide to building AI agents (OpenAI, web) | | same | Single / manager / decentralized; guardrails |
+| 2026-11-05 | §2 Read first: Effective context engineering for AI agents (Anthropic) | | same | Source of the prompt-structure checklist |
+| | **§2 total** | ~2–3 h (roadmap estimate) | Exit criterion met | Follow-ups: A2A (§6.3) and evals (§6.4/§10) flagged for deeper study |
 
 ## Task metrics (ROADMAP §10)
 

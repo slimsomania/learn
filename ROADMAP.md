@@ -62,6 +62,8 @@ Read first (2–3 h total, all free):
 - [A practical guide to building AI agents, OpenAI (web version)](https://openai.com/business/guides-and-resources/a-practical-guide-to-building-ai-agents/): single-agent vs manager vs decentralized handoff designs, guardrails (2025, evergreen concepts; the old PDF's model names such as gpt-4o and o1 were dated, so check whether the web version updated them).
 - [Effective context engineering for AI agents, Anthropic](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) (Sep 2025; evergreen): what each worker should and shouldn't see.
 
+Exit criterion: [notes/section-2-core-concepts.md](notes/section-2-core-concepts.md). It defines each term in your own words, maps the five patterns onto your current workflow, and lists what a reviewer should and shouldn't see. It also holds the **prompt-structure checklist** (background · instructions · tool guidance · output description) from the context-engineering article; use it for every role file and system prompt.
+
 Last verified: Nov 2, 2026.
 
 ---
