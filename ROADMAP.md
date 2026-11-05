@@ -59,7 +59,7 @@ Rule: if a phase's exit criterion isn't met, repeat the phase. Don't add more ag
 
 Read first (2–3 h total, all free):
 - [Building effective agents, Anthropic](https://www.anthropic.com/engineering/building-effective-agents) (Dec 2024; evergreen *concepts only*): workflows vs agents; the five base patterns (prompt chaining, routing, parallelization, orchestrator-workers, evaluator-optimizer). Anthropic's own banner says "much of the tooling landscape described in this post has changed since December 2024", so skip its framework list and tooling advice. The patterns map onto the orchestrations in Agent Framework and the OpenAI Agents SDK (§3.2).
-- [A practical guide to building agents, OpenAI (PDF)](https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf): single-agent vs manager vs decentralized handoff designs, guardrails (2025, evergreen concepts; its model names such as gpt-4o and o1 are dated).
+- [A practical guide to building AI agents, OpenAI (web version)](https://openai.com/business/guides-and-resources/a-practical-guide-to-building-ai-agents/): single-agent vs manager vs decentralized handoff designs, guardrails (2025, evergreen concepts; the old PDF's model names such as gpt-4o and o1 were dated, so check whether the web version updated them).
 - [Effective context engineering for AI agents, Anthropic](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents) (Sep 2025; evergreen): what each worker should and shouldn't see.
 
 Last verified: Nov 2, 2026.
