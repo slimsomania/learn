@@ -50,13 +50,16 @@ Use the assigned sources in ROADMAP §6. Do not mark a live API/cloud criterion 
 ## Open questions / decisions
 
 - Work, check yourself first (ROADMAP §3.6), then ask the admin about what's missing:
-  - [ ] Copilot CLI installs and signs in
-  - [ ] "Copilot" is assignable on issues (coding agent)
-  - [ ] Optional only: Codex shows up as an approved Agent HQ partner agent
+  - [x] Work-account screenshots show a selectable Cloud execution target (2026-11-05); successful execution, issue assignment and policy approval remain unconfirmed
+  - [x] Work-account model picker shows GPT-6.1 Sol, GPT-5.6 Sol and GPT-5.6 Luna (2026-11-05); this is not a complete model inventory or proof of policy coverage
+  - [x] Copilot CLI installs and signs in (learner-confirmed, 2026-11-05)
+  - [ ] Successful Cloud task and "Copilot" issue assignment: learner thinks both are available (2026-11-05); verify on an approved repository
+  - Current work scope is GitHub Copilot only (learner-confirmed, 2026-11-05); separate Agent HQ Codex/Claude partner agents are out of scope, not an outstanding access question
   - [ ] Confirm allowed models and whether any non-OpenAI models are enabled; vendor diversity is not required
-  - [ ] Confirm policy coverage for delegated/built-in/fallback, PR review, permission-approval and background model paths; main-model selection alone does not establish no-Anthropic compliance
+  - [ ] Confirm policy coverage for delegated/built-in/fallback, PR review, permission-approval and background model paths; learner thinks coverage exists (2026-11-05), but enforcement remains unconfirmed and main-model selection alone does not establish no-Anthropic compliance
   - [ ] Confirm approved application-model endpoints, authentication, quota/budget and telemetry/data handling; Copilot access does not establish Azure API entitlement
-  - [ ] Confirm Azure/Actions/repository-protection access and workplace Docker licensing before the corresponding practice
+  - [x] Actions, repository protection and workplace Docker use are available (learner-confirmed, 2026-11-05)
+  - [ ] Confirm Azure access and workplace Docker licensing before the corresponding practice; Docker availability alone does not establish licensing
 - VPS (Hermes, ROADMAP §5.1):
   - [x] Note the exact Hetzner plan: CX23, 2 vCPU / 4 GB / 40 GB (2026-11-02)
   - [ ] Inspect/back up the source build and data, preserve local patches, and check applicable release/security fixes. Last reported build: v0.22.0+119 (2026-09-24), not a live check
@@ -73,3 +76,7 @@ Use the assigned sources in ROADMAP §6. Do not mark a live API/cloud criterion 
 ## Revision note
 
 2026-11-05: synchronized phase order and study/application checkpoints with the validated roadmap revision. Existing completion records and the checked VPS specification were preserved. No new learner progress, account approval, live deployment or successful lab is claimed.
+
+2026-11-05: recorded screenshots confirmed by the learner as coming from the company-managed work account: Cloud is selectable and three OpenAI models are visible. No successful cloud run, CLI access, issue assignment or delegated/background model-policy enforcement was demonstrated.
+
+2026-11-05: learner confirmed work Copilot CLI installation/sign-in and availability of Actions, repository protection and workplace Docker use. Cloud execution/issue assignment and no-Anthropic policy coverage were reported tentatively ("I think so"), so remain open. Azure/API access, budgets and Docker licensing were not confirmed.
