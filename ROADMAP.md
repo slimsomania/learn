@@ -202,6 +202,8 @@ Practice (home, B): specify one React list + .NET endpoint increment -> implemen
 
 ## 4. Working with different models together (Q5)
 
+**Home access (learner-reported, Nov 6, 2026):** Claude Pro with Claude Code is available; Codex access is not currently available. The learner is willing to add Codex if needed, but it remains optional and no purchase is assumed.
+
 Study model selection and review trade-offs during B, then compare permitted configurations. C's local-model lab is optional. Different vendors may still share failure modes; independence is a hypothesis, not a correctness guarantee.
 
 | Technique | What it is | How to do it |
@@ -253,6 +255,8 @@ Last verified: Nov 5, 2026 (public contracts and study coverage; no unattended r
 ### 5.1 Hermes on the existing VPS: safety now, coding trigger optional
 
 Hermes is the Telegram front door and notification layer, not the code orchestrator. Your source-built instance runs on a Hetzner CX23 (2 vCPU, 4 GB RAM, 40 GB disk), not on the laptop. It cannot reach a powered-off or unreachable laptop. Use a cloud runner for laptop-off work; keep the small VPS for notifications and measured light jobs.
+
+**Update status (learner-reported, Nov 6, 2026):** the learner reported completing an update and supplied `v0.22.0+119.g0e427d7` (2026-09-24), stable, local build. This shares the earlier reported base/date; latest-release status and the running gateway have not been independently checked. Backups, security and resource checks remain open in PROGRESS.md.
 
 Study [security](https://hermes-agent.nousresearch.com/docs/user-guide/security/) and [source updating/backups](https://hermes-agent.nousresearch.com/docs/getting-started/updating) before changing this live installation. Explain the difference between updating a checkout, migrating data and restarting the service. Back up data and preserve source patches; inspect the actual install/channel and running gateway after an update. Check [releases](https://github.com/NousResearch/hermes-agent/releases) and [advisories](https://github.com/advisories?query=hermes-agent), not a frozen "minimum safe version". Some public advisories are unreviewed and do not identify a patched version; match the relevant fixes to the deployed commit.
 
