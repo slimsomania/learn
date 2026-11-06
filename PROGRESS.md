@@ -49,8 +49,6 @@ Use the assigned sources in ROADMAP §6. Do not mark a live API/cloud criterion 
 
 ## Open questions / decisions
 
-API/deployment preparation can be arranged when needed (learner-reported, 2026-11-06). No immediate answer is required; actual access, work approval and a spending cap still need to be established before paid/live exercises. This is not authorization to provision resources or incur charges.
-
 - Work, check yourself first (ROADMAP §3.6), then ask the admin about what's missing:
   - [x] Work-account screenshots show a selectable Cloud execution target (2026-11-05); successful execution, issue assignment and policy approval remain unconfirmed
   - [x] Work-account model picker shows GPT-6.1 Sol, GPT-5.6 Sol and GPT-5.6 Luna (2026-11-05); this is not a complete model inventory or proof of policy coverage
@@ -64,15 +62,12 @@ API/deployment preparation can be arranged when needed (learner-reported, 2026-1
   - [ ] Confirm Azure access and workplace Docker licensing before the corresponding practice; Docker availability alone does not establish licensing
 - VPS (Hermes, ROADMAP §5.1):
   - [x] Note the exact Hetzner plan: CX23, 2 vCPU / 4 GB / 40 GB (2026-11-02)
-  - [ ] Inspect/back up the source build and data, preserve local patches, and check applicable release/security fixes against the reported build below
-  - [x] Hermes update reported complete (2026-11-06); whether the installed build is the latest applicable release remains unverified
-  - [x] Exact Hermes version supplied: `v0.22.0+119.g0e427d7` (2026-09-24), stable, local build (learner-reported, 2026-11-06)
-  - [ ] Verify the running gateway matches the reported build and check applicable releases/fixes; the supplied version shares the earlier reported base/date, so it does not by itself establish an update or latest-release status
+  - [ ] Inspect/back up the source build and data, preserve local patches, and check applicable release/security fixes. Last reported build: v0.22.0+119 (2026-09-24), not a live check
+  - [ ] Update through the actual install's supported method and verify the running gateway, not only checkout version; no frozen minimum version is a security guarantee
   - [ ] Set container limits that fit 4 GB/40 GB, then check host RAM headroom with `free -m` and `docker stats` during a light job
   - [ ] Check §5.1 authorization, approvals, backend/mount/network isolation, credential passthrough, hooks/plugins and secret protection
+  - [ ] Which Claude plan do you have: Pro, or Max/Ultra?
 - Home, when selecting API/extra-reviewer practice:
-  - [x] Claude Pro used with Claude Code (learner-confirmed, 2026-11-06; roughly $20/month as reported, not a verified pricing quote)
-  - [x] Current Codex access: unavailable; learner is willing to add it if needed (2026-11-06), not a purchase commitment or required setup
   - [ ] Check available API access and credit/budget privately; do not put keys in notes/chat (application API billing is separate from consumer subscriptions)
   - [ ] If choosing codex-plugin-cc, check existing ChatGPT/Codex authentication and limits or API access; a paid ChatGPT plan is not inherently required
   - [ ] Choose a small inference/evaluation budget before E2/E3; check separate cloud/Search/telemetry costs before E5/E6
@@ -85,7 +80,3 @@ API/deployment preparation can be arranged when needed (learner-reported, 2026-1
 2026-11-05: recorded screenshots confirmed by the learner as coming from the company-managed work account: Cloud is selectable and three OpenAI models are visible. No successful cloud run, CLI access, issue assignment or delegated/background model-policy enforcement was demonstrated.
 
 2026-11-05: learner confirmed work Copilot CLI installation/sign-in and availability of Actions, repository protection and workplace Docker use. Cloud execution/issue assignment and no-Anthropic policy coverage were reported tentatively ("I think so"), so remain open. Azure/API access, budgets and Docker licensing were not confirmed.
-
-2026-11-06: learner confirmed Claude Pro with Claude Code, reported no current Codex access but willingness to add it if needed, and reported Hermes updated to the latest version. Exact running Hermes version, backups, security and resource checks remain unverified.
-
-2026-11-06: learner supplied Hermes `v0.22.0+119.g0e427d7` (2026-09-24), stable, local build. Exact-version reporting is complete; latest-release status and running gateway verification remain open, as do backups and security/resource checks. The supplied version shares the base/date of the earlier report.
