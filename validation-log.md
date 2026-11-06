@@ -1,4 +1,4 @@
-# Validation log
+# Validation log 
 
 Append-only. One entry per validation pass (see the `revalidate` and `research-topic` skills).
 
